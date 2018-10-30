@@ -1,6 +1,106 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+struct Node{
+	int x;
+	int y;
+	int pos;	
+	struct Node *north;
+	struct Node *south;
+	struct Node *east;
+	struct Node *west;
+
+}Node;
+struct Map{
+	int size;
+	int n;
+	struct Node** nodeList;
+};
+struct Map* createMap(int size){
+	struct Map *map =(struct table*)malloc(sizeof(struct Map));
+	map->size=size;
+	map->n=0;
+	map->nodeList=(struct Node*)malloc(sizeof(struct Node*)*size);
+	for(int i=0;i<size;i++){
+		map->nodeList[i]=NULL;
+	}
+	return map;
+}
+struct Map* increaseSize(struct Map* map,int size){
+	map=(struct table*)realloc(map,(sizeof(struct Map)));
+	map->nodeList=(struct Node**)realloc(map,sizeof(struct Node*)*size);
+	for(int i=map->size; i<size;i++){
+		map->nodeList[i]=NULL;
+	}	
+	map->size=size;
+	return map;
+}
+void insert(struct Map* map,int x,int y){
+	int hash=(y*map->n)+x;
+	struct Node *newNode=(struct Node*)malloc(sizeof(struct Node));
+	newNode->x=x;
+	newNode->y=y;
+	newNode->pos=
+	newNode->north=NULL;
+	newNode->south=NULL;
+	newNode->east=NULL;
+	newNode->west=NULL;
+	map->nodeList[hash]=newNode;
+}
+struct Node* lookup(struct Map* map,int x, int y){
+	int hash=(y*map->n)+x;
+	struct Node *list=map->nodeList[hash];
+	struct Node *temp=list;
+	if(temp->x==x&&temp->y==y){
+		return temp;
+	}
+	return NULL;
+}
+struct Map* readFile(char* INFILE){
+	FILE *fp;
+	char buf[256];
+	char* line=NULL;
+	int n=0;
+	int x=0;
+	int y=0;
+	int numNodes=0;
+	struct Map *map=createMap(0);
+	if(INFILE != NULL){
+		fp=fopen(INFILE,"r");
+		if(fp==NULL){
+			printf("Cannot find file\n");
+			exit(EXIT_FAILURE);
+		}
+		while((line=fgets(buf,256,fp))!=NULL){
+			char* token;
+			
+			if(y==0)
+				n=strlen(line)/2;
+			while((token=strtok(line," "))!=NULL){
+				if(token==0){
+					numNodes++;
+					map=increaseSize(map,numNodes);
+					map->n++;
+					insert(map,x,y);
+				}
+				struct Node *temp=lookup(map,x,y);
+				if(temp==NULL){
+					printf("1 ");
+				}
+				else{
+					printf("%d,%d ",temp->x,temp->y);
+				}
+				line=NULL;
+				x++;
+			}
+			x=0;
+			y++;
+
+			printf("\n");
+		}
+	}
+	return map;
+}
 
 
 int main(int argc,char* argv[]){
@@ -45,6 +145,9 @@ int main(int argc,char* argv[]){
 		}
 	}
 	printf("%d %d %d %s %s\n",pretty,shortest,path,INFILE,OUTFILE);
+	
+	readFile(INFILE);	
+
 
 	return 0;
 
