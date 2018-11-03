@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +15,7 @@ typedef struct Node{
 	struct Node* east;		
 	struct Node* west;		
 }Node;
+
 typedef struct Queue{
 	struct Node** items;
 	int size;
@@ -35,8 +37,8 @@ struct Node createNode(int value,int row,int col){
 	return aNode;
 }
 struct Queue* createQueue(int size){
-	struct Queue* q=malloc(sizeof(struct Queue)*10*size);
-	q->items=malloc(sizeof(struct Node)*10*size);
+	struct Queue* q=malloc(sizeof(struct Queue)*size);
+	q->items=malloc(sizeof(struct Node)*size);
 	q->size=size;
 	q->front=0;
 	q->back=0;
@@ -46,10 +48,10 @@ void enqueue(Queue *q,Node *n){
 	q->items[q->back]=n;
 	q->back++;
 }
-Node *dequeue(Queue *q){
-	Node *n = q->items[q->front];
+void dequeue(Queue *q){
+	//Node *n = q->items[q->front];
 	q->front++;
-	return n;
+	//return n;
 }
 int queueSize(Queue *q){
 	return(q->back-q->front);
@@ -65,8 +67,7 @@ void printQueue(Queue *q){
 	printf("\n");
 
 }
-int* sizeOfMaze(char INFILE[]){
-	FILE *fp=fopen(INFILE,"r");
+int* sizeOfMaze(FILE *fp){
 	int* xy=malloc(sizeof(int)*2);
 	int row=0;
 	int col=0;
@@ -74,6 +75,7 @@ int* sizeOfMaze(char INFILE[]){
 	char *buf=NULL;
 	size_t len=0;
 	while(getline(&buf,&len,fp)>0){
+		//printf("%s",buf);	
 		for(unsigned int i=0;i<strlen(buf);i++){
 			if(buf[i]>47 && buf[i]<58 && line==1){
 				col++;
@@ -86,32 +88,29 @@ int* sizeOfMaze(char INFILE[]){
 	xy[1]=col;
 	return xy;
 }
-void initMatrix(char INFILE[],int x,int y,Node matrix[y][x]){
-	FILE *fp;
-	char buf[256];
+void initMatrix(FILE *fp,int x,int y,Node matrix[y][x]){
+	char buf[x*y];
 	char* line=NULL;
 	int row=0;
 	int col=0;
-
-	if(INFILE != NULL){
-		fp=fopen(INFILE,"r");
-		if(fp==NULL){
-			printf("Cannot find file\n");
-			exit(EXIT_FAILURE);
+	if(fp==NULL){
+		//printf("Cannot find file\n");
+		exit(EXIT_FAILURE);
+	}
+	while((line=fgets(buf,x*y,fp))!=NULL){
+		char* token;
+			
+		while((token=strtok(line," "))!=NULL){
+				//printf("%s ",token);	
+				matrix[row][col]=createNode(atoi(token),row,col);	
+				//printf("%d ",matrix[row][col].val);
+				col++;
+				
+			line=NULL;
 		}
-		while((line=fgets(buf,256,fp))!=NULL){
-			char* token;
-			while((token=strtok(line," "))!=NULL){	
-					matrix[row][col]=createNode(atoi(token),row,col);	
-					//printf("%d ",matrix[row][col].val);
-					col++;
-					
-				line=NULL;
-			}
-			row++;
-			col=0;
-			//printf("\n");
-		}
+		row++;
+		col=0;
+		//printf("\n");
 	}
 }
 void printHelp(){
@@ -150,7 +149,6 @@ int BFS(int x,int y,Node matrix[y][x]){
 		Queue *q=createQueue(x*y);
 		enqueue(q,curr);
 		curr->rank=1;
-		curr->shortPath=1;
 		while(queueSize(q)!=0){
 			if(curr->north!=NULL &&curr->north->val==0 && curr->north->rank==-1){
 				enqueue(q,curr->north);
@@ -168,10 +166,11 @@ int BFS(int x,int y,Node matrix[y][x]){
 				enqueue(q,curr->west);
 				curr->west->rank=curr->rank+1;
 			}
-			Node *dq=dequeue(q);
+			dequeue(q);
 			//printf("Rank: %d Row: %d Col: %d\n",dq->rank,dq->y,dq->x);
 			curr = q->items[q->front];
 		}
+		free(q);
 		return(matrix[y-1][x-1].rank);
 	}
 	else
@@ -195,21 +194,7 @@ void BackTrack(int x,int y,Node matrix[y][x]){
 			cur=cur->west;
 		}
 	}
-
-
-}
-void printPointerNode(Node *node){
-	printf("Node[%d,%d] ", node->x,node->y);
-	printf("val:%d ",node->val);
-	if(node->north!=NULL)
-		printf("north:[%d,%d] ",node->north->x,node->north->y);
-	if(node->south!=NULL)
-		printf("south:[%d,%d] ",node->south->x,node->south->y);
-	if(node->east!=NULL)
-		printf("east:[%d,%d] ",node->east->x,node->east->y);
-	if(node->west!=NULL)
-		printf("west:[%d,%d]",node->west->x,node->west->y);
-	printf("\n");
+	matrix[0][0].shortPath=1;
 }
 void printNode(Node node){
 	printf("Node[%d,%d] ", node.x,node.y);
@@ -231,56 +216,69 @@ void printNeighbors(int x,int y,Node matrix[y][x]){
 		}
 	}
 }
-void prettyPrint(int x,int y,Node matrix[y][x]){
+void prettyPrint(FILE* OUTFILE,int x,int y,Node matrix[y][x]){
 	for(int i=0;i<2*x+3;i++){
 		if(i==0 || i==x*2+2)
-			printf("|");
+			fprintf(OUTFILE,"|");
 		else
-			printf("-");
+			fprintf(OUTFILE,"-");
 	}
-	printf("\n");
+	fprintf(OUTFILE,"\n");
 	for(int j=0;j<y;j++){
 		if(j!=0)
-			printf("|");
+			fprintf(OUTFILE,"|");
 		else
-			printf(" ");
+			fprintf(OUTFILE," ");
 		for(int k=0;k<x;k++){
 			if(matrix[j][k].shortPath==1){
-				printf(KRED" +"RESET);
+			//	fprintf(OUTFILE,KRED" +"RESET);
+				fprintf(OUTFILE," +");
 			}
 			else if(matrix[j][k].val==0)
-				printf(" .");
+				fprintf(OUTFILE," .");
 			else
-				printf(" #");
+				fprintf(OUTFILE," #");
 		}
 		if(j!=y-1)
-			printf(" |\n");
+			fprintf(OUTFILE," |\n");
 		else
-			printf("  \n");
+			fprintf(OUTFILE,"  \n");
 	}
 	for(int l=0;l<2*x+3;l++){
 		if(l==0 || l==x*2+2)
-			printf("|");
+			fprintf(OUTFILE,"|");
 		else
-			printf("-");
+			fprintf(OUTFILE,"-");
 	}
-	printf("\n");
+	fprintf(OUTFILE,"\n");
+}
+
+void destroyMatrix(int x,int y,Node matrix[y][x]){
+	for(int i=0;i<y;i++){
+		for(int j=0;j<x;j++){
+			
+		
+
+
+		}
+	}
 }
 
 int main(int argc,char* argv[]){
 	int pretty=0;
 	int shortest=0;
 	int path=0;
-	char* INFILE = NULL;
-	char* OUTFILE =NULL;
+	FILE* INFILE = stdin;
+	FILE* OUTFILE =stdout;
 
 	for(int i=1;i< argc;i++){
 		if(argv[i][1]=='i'&& argv[i+1]!=NULL && argv[i+1][0]!='-'){
-			INFILE=argv[i+1];
+			INFILE=fopen(argv[i+1],"r");
 			i++;
+			
 		}
 		else if(argv[i][1]=='o' && argv[i+1]!=NULL && argv[i+1][0]!='-'){
-			OUTFILE=argv[i+1];
+			OUTFILE=fopen(argv[i+1],"w");
 			i++;
 		}
 		else if(argv[i][0]=='-'){
@@ -301,29 +299,37 @@ int main(int argc,char* argv[]){
 			exit(EXIT_FAILURE);
 		}
 	}
-	printf("%d %d %d %s %s\n",pretty,shortest,path,INFILE,OUTFILE);
-	int* xy=sizeOfMaze(INFILE);
+
+//	printf("%d %d %d %s %s\n",pretty,shortest,path,INFILE,OUTFILE);
+	int* xy;
+	xy=sizeOfMaze(INFILE);
+	rewind(INFILE);
 	int y=xy[0];
 	int x=xy[1];
-	
-	//printf("size:%d,%d \n",x,y);
 	Node matrix[y][x];
 	initMatrix(INFILE,x,y,matrix);	
-	if(pretty){
-		prettyPrint(x,y,matrix);	
-	}	
+	if(pretty)
+		prettyPrint(OUTFILE,x,y,matrix);	
+	free(xy);
+
+		
 
 	setNeighbors(x,y,matrix);
+	
 
 	//printNeighbors(x,y,matrix);	
 	int numSteps=BFS(x,y,matrix);
-	if(numSteps!=-1){
-		printf("Solution in %d steps.\n",numSteps);	
-		BackTrack(x,y,matrix);
+	if(shortest){
+		if(numSteps!=-1){
+			fprintf(OUTFILE,"Solution in %d steps.\n",numSteps);	
+			BackTrack(x,y,matrix);
+		}
+		else
+			fprintf(OUTFILE,"No solution.\n");
 	}
-	else
-		printf("No solution.\n");
-	prettyPrint(x,y,matrix);
+	if(path)
+		prettyPrint(OUTFILE,x,y,matrix);
+	
 	return 0;
 
 }
