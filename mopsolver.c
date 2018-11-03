@@ -1,9 +1,15 @@
-
+// Author Jacob Verdesi
+// Maze  traversal programing using bfs
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #define KRED "\x1B[31m"
 #define RESET "\x1B[0m"
+
+
+/**
+ * A node sturcture representing a path or wall
+ */
 typedef struct Node{
 	int x;
 	int y;
@@ -15,14 +21,18 @@ typedef struct Node{
 	struct Node* east;		
 	struct Node* west;		
 }Node;
-
+/**
+ * A queue structure used for bfs searching
+ */
 typedef struct Queue{
 	struct Node** items;
 	int size;
 	int back;
 	int front;
 }Queue;
-
+/**
+ * create a new node and initilize values
+ */
 struct Node createNode(int value,int row,int col){
 	Node aNode;
 	aNode.val=value;
@@ -36,6 +46,9 @@ struct Node createNode(int value,int row,int col){
 	aNode.west=NULL;
 	return aNode;
 }
+/**
+ * creates and allocates a queue
+ */
 struct Queue* createQueue(int size){
 	struct Queue* q=malloc(sizeof(struct Queue)*size);
 	q->items=malloc(sizeof(struct Node)*size);
@@ -44,18 +57,30 @@ struct Queue* createQueue(int size){
 	q->back=0;
 	return q;
 }
+/**
+ *adds node to end
+ */
 void enqueue(Queue *q,Node *n){
 	q->items[q->back]=n;
 	q->back++;
 }
+/**
+ * moves the front of queue 1 forward
+ */
 void dequeue(Queue *q){
 	//Node *n = q->items[q->front];
 	q->front++;
 	//return n;
 }
+/*
+ * returns the size of the q
+ */
 int queueSize(Queue *q){
 	return(q->back-q->front);
 }
+/**
+ * prints the nodes inside the queue
+ */
 void printQueue(Queue *q){
 	printf("Queue[%d]:",queueSize(q));
 	
@@ -67,6 +92,9 @@ void printQueue(Queue *q){
 	printf("\n");
 
 }
+/**
+ * reads a file and determines the size of maze
+ */
 int* sizeOfMaze(FILE *fp){
 	int* xy=malloc(sizeof(int)*2);
 	int row=0;
@@ -88,6 +116,9 @@ int* sizeOfMaze(FILE *fp){
 	xy[1]=col;
 	return xy;
 }
+/**
+ * reads a file and adds nodes to a given matrix
+ */
 void initMatrix(FILE *fp,int x,int y,Node matrix[y][x]){
 	char buf[x*y];
 	char* line=NULL;
@@ -113,6 +144,9 @@ void initMatrix(FILE *fp,int x,int y,Node matrix[y][x]){
 		//printf("\n");
 	}
 }
+/**
+ * prints help msg
+ */
 void printHelp(){
 	printf("-h      Print this helpful message to stdout and exit.\n");
 	printf("-d      Pretty print (display) the maze after reading.  (Default: off)\n");
@@ -122,6 +156,9 @@ void printHelp(){
 	printf("-o OUTFILE	Write all output to OUTFILE		(Default: stdout)\n");
 	exit(EXIT_FAILURE);
 }
+/**
+ * goes through matrix and sets north,south ,east, west neighbors
+ */
 void setNeighbors(int x,int y,Node matrix[y][x]){
 	for(int i=0;i<y;i++){
 		for(int j=0;j<x;j++){
@@ -139,7 +176,10 @@ void setNeighbors(int x,int y,Node matrix[y][x]){
 		}
 	}
 }
-
+/**
+ * Bfs search using queue
+ * retursn shortest path length
+ */
 int BFS(int x,int y,Node matrix[y][x]){
 	if(matrix[0][0].val==0&&matrix[y-1][x-1].val==0){
 		Node *curr=&matrix[0][0];	
@@ -176,6 +216,9 @@ int BFS(int x,int y,Node matrix[y][x]){
 	else
 		return -1;
 }
+/**
+ * Bactracker that finds the path of shortest
+ */
 void BackTrack(int x,int y,Node matrix[y][x]){
 	int start=matrix[y-1][x-1].rank;
 	Node *cur=&matrix[y-1][x-1];
@@ -196,6 +239,9 @@ void BackTrack(int x,int y,Node matrix[y][x]){
 	}
 	matrix[0][0].shortPath=1;
 }
+/**
+ * Prints a node
+ */
 void printNode(Node node){
 	printf("Node[%d,%d] ", node.x,node.y);
 	printf("val:%d ",node.val);
@@ -209,6 +255,9 @@ void printNode(Node node){
 		printf("west:[%d,%d]",node.west->x,node.west->y);
 	printf("\n");
 }
+/**
+ * prints all the neghbors in a matrix
+ */
 void printNeighbors(int x,int y,Node matrix[y][x]){
 	for(int i=0;i<y;i++){
 		for(int j=0;j<x;j++){
@@ -216,6 +265,9 @@ void printNeighbors(int x,int y,Node matrix[y][x]){
 		}
 	}
 }
+/**
+ * displays the graph with all values
+ */
 void prettyPrint(FILE* OUTFILE,int x,int y,Node matrix[y][x]){
 	for(int i=0;i<2*x+3;i++){
 		if(i==0 || i==x*2+2)
@@ -263,7 +315,10 @@ void destroyMatrix(int x,int y,Node matrix[y][x]){
 		}
 	}
 }
-
+/**
+ * main function handles arguments
+ * runs matrix functions
+ */
 int main(int argc,char* argv[]){
 	int pretty=0;
 	int shortest=0;
