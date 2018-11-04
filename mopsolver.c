@@ -78,6 +78,10 @@ void dequeue(Queue *q){
 int queueSize(Queue *q){
 	return(q->back-q->front);
 }
+void destroyQueue(Queue* queue){
+	free(queue->items);
+	free(queue);
+}
 /**
  * prints the nodes inside the queue
  */
@@ -108,10 +112,12 @@ int* sizeOfMaze(FILE *fp){
 			if(buf[i]>47 && buf[i]<58 && line==1){
 				col++;
 			}	
+		
 		}
 		row++;
 		line++;
 	}
+	free(buf);
 	xy[0]=row;
 	xy[1]=col;
 	return xy;
@@ -210,7 +216,7 @@ int BFS(int x,int y,Node matrix[y][x]){
 			//printf("Rank: %d Row: %d Col: %d\n",dq->rank,dq->y,dq->x);
 			curr = q->items[q->front];
 		}
-		free(q);
+		destroyQueue(q);
 		return(matrix[y-1][x-1].rank);
 	}
 	else
@@ -305,16 +311,6 @@ void prettyPrint(FILE* OUTFILE,int x,int y,Node matrix[y][x]){
 	fprintf(OUTFILE,"\n");
 }
 
-void destroyMatrix(int x,int y,Node matrix[y][x]){
-	for(int i=0;i<y;i++){
-		for(int j=0;j<x;j++){
-			
-		
-
-
-		}
-	}
-}
 /**
  * main function handles arguments
  * runs matrix functions
@@ -365,12 +361,8 @@ int main(int argc,char* argv[]){
 	initMatrix(INFILE,x,y,matrix);	
 	if(pretty)
 		prettyPrint(OUTFILE,x,y,matrix);	
-	free(xy);
-
-		
 
 	setNeighbors(x,y,matrix);
-	
 
 	//printNeighbors(x,y,matrix);	
 	int numSteps=BFS(x,y,matrix);
@@ -384,7 +376,9 @@ int main(int argc,char* argv[]){
 	}
 	if(path)
 		prettyPrint(OUTFILE,x,y,matrix);
-	
+	fclose(INFILE);
+	fclose(OUTFILE);	
+	free(xy);
 	return 0;
 
 }
