@@ -1,5 +1,6 @@
 // Author Jacob Verdesi
 // Maze  traversal programing using bfs
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -111,8 +112,7 @@ int* sizeOfMaze(FILE *fp){
 		for(unsigned int i=0;i<strlen(buf);i++){
 			if(buf[i]>47 && buf[i]<58 && line==1){
 				col++;
-			}	
-		
+			}		
 		}
 		row++;
 		line++;
@@ -289,8 +289,8 @@ void prettyPrint(FILE* OUTFILE,int x,int y,Node matrix[y][x]){
 			fprintf(OUTFILE," ");
 		for(int k=0;k<x;k++){
 			if(matrix[j][k].shortPath==1){
-			//	fprintf(OUTFILE,KRED" +"RESET);
-				fprintf(OUTFILE," +");
+				fprintf(OUTFILE,KRED" +"RESET);
+			//	fprintf(OUTFILE," +");
 			}
 			else if(matrix[j][k].val==0)
 				fprintf(OUTFILE," .");

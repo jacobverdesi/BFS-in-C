@@ -1,0 +1,44 @@
+commit 4e92639f0e54d8f69a8acd05b2040633dda4ee7a
+Author: Jacob  Verdesi <jxv3386@cs.rit.edu>
+Date:   Sat Nov 3 21:12:33 2018 -0400
+
+    Freed all memory allocations
+
+commit 839a58a6450b7c35fab5978ed3c783c35cdcb54e
+Author: Jacob  Verdesi <jxv3386@cs.rit.edu>
+Date:   Sat Nov 3 18:27:55 2018 -0400
+
+    Added comments
+
+commit c89c58235494ffde9232fc7d11e0eabd6d68c5b3
+Author: Jacob  Verdesi <jxv3386@cs.rit.edu>
+Date:   Sat Nov 3 18:19:50 2018 -0400
+
+    Finished print output
+    Backtracking
+    errors
+
+commit 439b8bfaf6043a71e46c609e326def5b007eb884
+Author: Jacob  Verdesi <jxv3386@cs.rit.edu>
+Date:   Sat Nov 3 04:45:30 2018 -0400
+
+    Added Bfs traversal
+    Matrix createtion
+    Pretty Print
+    SetNeighbors
+
+commit 3a78ada611e5fec7f9a7bdf6fc8b3b9e763bbe3d
+Author: Jacob  Verdesi <jxv3386@cs.rit.edu>
+Date:   Mon Oct 29 20:35:25 2018 -0400
+
+    created Nodes Graphmap
+    create readfile
+    created createmap
+    created increasemap
+
+commit 76bc351b52effda2d72b9283761f58af37feeaef
+Author: Jacob  Verdesi <jxv3386@cs.rit.edu>
+Date:   Sun Oct 28 17:15:03 2018 -0400
+
+    Created main function
+    handels inputs and sets display variables
